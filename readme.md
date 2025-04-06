@@ -3,8 +3,8 @@
 # 🏦 Автотесты для API сущности "Entity"
 
 [![Java](https://img.shields.io/badge/Java-17-red?logo=openjdk)](https://www.java.com/ru/)
-[![RestAssured](https://img.shields.io/badge/RestAssured-4.4.0-blue?logo=restassured)](https://rest-assured.io/)
-[![TestNG](https://img.shields.io/badge/TestNG-7.4-red?logo=testng)](https://testng.org)
+[![RestAssured](https://img.shields.io/badge/RestAssured-5.3-blue?logo=restassured)](https://rest-assured.io/)
+[![TestNG](https://img.shields.io/badge/TestNG-7.10.2-red?logo=testng)](https://testng.org)
 [![Maven](https://img.shields.io/badge/Maven-3.8-orange?logo=apachemaven)](https://maven.apache.org)
 
 Автоматизированные тесты для взаимодействия с API сущности "Entity" с использованием RestAssured и TestNG.
