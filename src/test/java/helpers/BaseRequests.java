@@ -1,7 +1,6 @@
 package helpers;
 
 import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.config.LogConfig;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.response.Response;

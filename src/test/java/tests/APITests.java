@@ -12,8 +12,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.testng.Assert.*;
@@ -21,8 +19,6 @@ import static org.testng.Assert.*;
 @Epic("Тестирование API")
 @Feature("Взаимодействие с Entity")
 public class APITests {
-    private static final List<String> createdEntities = Collections.synchronizedList(new ArrayList<>());
-
     @AfterMethod(alwaysRun = true)
     public void tearDown() {
         EntityHelper.cleanup();
