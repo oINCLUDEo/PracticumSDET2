@@ -1,0 +1,16 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.1.dtd">
+<suite name="API Test Suite" parallel="methods" thread-count="5">
+    <test name="Add Customer Test">
+        <classes>
+            <class name="tests.APITests">
+                <methods>
+                    <include name="createEntityTest"/>
+                    <include name="getEntityTest"/>
+                    <include name="getAllEntitiesTest"/>
+                    <include name="updateEntityTest"/>
+                    <include name="deleteEntityTest"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>
