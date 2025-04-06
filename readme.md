@@ -1,6 +1,6 @@
 # API Testing Project
 
-# 🏦 Автотесты для API сущности "Entity"
+# 🚀 Автотесты для API сущности "Entity"
 
 [![Java](https://img.shields.io/badge/Java-17-red?logo=openjdk)](https://www.java.com/ru/)
 [![RestAssured](https://img.shields.io/badge/RestAssured-5.3-blue?logo=restassured)](https://rest-assured.io/)
