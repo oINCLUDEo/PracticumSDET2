@@ -22,7 +22,6 @@ public class BaseRequests {
                 .setContentType(ContentType.JSON)
                 .setBaseUri(BASE_URI)
                 .setAccept(ContentType.JSON)
-                .log(LogConfig.logConfig().enableLoggingOfRequestAndResponseIfValidationFails().logDetailOfRequestAndResponseIfValidationFails())
                 .build();
     }
 
@@ -35,8 +34,6 @@ public class BaseRequests {
     public static Response get(String endpoint) {
         return given()
                 .spec(initRequestSpecification())
-                .log().all()
-                .when()
                 .get(endpoint);
     }
 
@@ -50,9 +47,7 @@ public class BaseRequests {
     public static Response post(String endpoint, Object body) {
         return given()
                 .spec(initRequestSpecification())
-                .log().all()
                 .body(body)
-                .when()
                 .post(endpoint);
     }
 
@@ -66,9 +61,7 @@ public class BaseRequests {
     public static Response patch(String endpoint, Object body) {
         return given()
                 .spec(initRequestSpecification())
-                .log().all()
                 .body(body)
-                .when()
                 .patch(endpoint);
     }
 
@@ -81,8 +74,6 @@ public class BaseRequests {
     public static Response delete(String endpoint) {
         return given()
                 .spec(initRequestSpecification())
-                .log().all()
-                .when()
                 .delete(endpoint);
     }
 }
