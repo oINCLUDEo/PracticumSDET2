@@ -25,62 +25,59 @@ permissions:
   id-token: write
 
 jobs:
-  download-history:
+  build-test:
     runs-on: ubuntu-latest
-    name: Download history
-    steps:
-      - name: setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      - run: mkdir -p allure-results
-      - name: Store allure history
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-results
-          path: allure-results
-          retention-days: 1
-
-  Test:
-    runs-on: ubuntu-latest
-    needs: download-history
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: setup Java
-        uses: actions/setup-java@v3
+      - name: Checkout API repository
+        uses: actions/checkout@v2
         with:
-          distribution: 'temurin'
-          java-version: '17'
-      - name: Cache Maven dependencies
-        uses: actions/cache@v3
+          repository: bondarenkokate73/simbirsoft_sdet_project
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: api_repo
+
+      - name: Checkout Test repository
+        uses: actions/checkout@v2
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Install dependencies with Allure plugin
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: test_repo
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Set up Docker Compose
         run: |
-          mvn clean install -DskipTests
-          mvn io.qameta.allure:allure-maven:install
-      - name: Run tests and generate report
+          sudo apt-get install docker-compose
+
+      - name: Build and run API with Docker Compose
         run: |
+          cd api_repo
+          docker-compose -f docker-compose.yaml up --build -d
+
+      - name: Wait for API to be ready
+        run: |
+          until curl -s http://localhost:8080/api/_/docs/swagger; do
+            echo "Waiting for API to be ready..."
+            sleep 10
+          done
+          echo "API is ready!"
+
+      - name: Run tests
+        run: |
+          cd test_repo
           mvn test
           mvn io.qameta.allure:allure-maven:report
-      - name: Store allure results
+
+      - name: Upload Allure report as an artifact
         uses: actions/upload-artifact@v4
         with:
           name: allure-results
-          path: target/allure-results
+          path: test_repo/target/allure-results
           retention-days: 1
-      - name: Check allure results directory
-        run: ls -al target/allure-results
 
   generate-report:
     runs-on: ubuntu-latest
-    needs: Test
+    needs: build-test
     name: Generate report
     steps:
       - uses: actions/setup-java@v3
@@ -105,8 +102,6 @@ jobs:
           name: _site
           path: _site
           retention-days: 1
-      - name: Check generated report
-        run: ls -al _site
 
   publish-report:
     runs-on: ubuntu-latest

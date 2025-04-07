@@ -4,10 +4,7 @@ import dto.EntitiesWrapper;
 import dto.Entity;
 import helpers.EntityHelper;
 import helpers.BaseRequests;
-import io.qameta.allure.Description;
-import io.qameta.allure.Epic;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import io.qameta.allure.*;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.Test;
@@ -40,10 +37,7 @@ public class APITests {
                 .statusCode(200)
                 .extract()
                 .as(Entity.class);
-        assertNotNull(createdEntity, "Сущность не должна быть null");
-        assertNotNull(createdEntity.getId(), "ID сущности не должен быть null");
-        assertEquals(createdEntity.getId(), entityId, "ID созданной сущности должен соответствовать возвращенному при создании");
-        assertNotNull(createdEntity.getTitle(), "Название сущности не должно быть null");
+        EntityHelper.verifyEntityCreated(createdEntity, entityId);  // Шаг для проверки созданной сущности
     }
 
     @Story("Изменение Entity")
@@ -67,12 +61,7 @@ public class APITests {
                 .statusCode(200)
                 .extract()
                 .as(Entity.class);
-        assertEquals(updatedEntityFromServer.getTitle(), updatedEntity.getTitle(),
-                "Название сущности должно обновиться");
-        assertNotEquals(updatedEntityFromServer.getTitle(), originalEntity.getTitle(),
-                "Название сущности должно отличаться от исходного");
-        assertEquals(updatedEntityFromServer.getId(), originalEntity.getId(),
-                "ID сущности не должен изменяться при обновлении");
+        EntityHelper.verifyEntityUpdated(updatedEntityFromServer, updatedEntity, originalEntity);
     }
 
     @Story("Удаление Entity")
@@ -115,8 +104,8 @@ public class APITests {
                 .as(EntitiesWrapper.class)
                 .getEntity()
                 .size();
-        String Entity1 = EntityHelper.createEntity();
-        String Entity2 = EntityHelper.createEntity();
+        String entity1 = EntityHelper.createEntity();
+        String entity2 = EntityHelper.createEntity();
 
         List<Entity> entities = BaseRequests.get("/getAll")
                 .then()
@@ -124,11 +113,6 @@ public class APITests {
                 .extract()
                 .as(EntitiesWrapper.class)
                 .getEntity();
-        assertTrue(entities.size() >= initialCount + 2,
-                "Общее количество сущностей должно увеличиться на 2");
-        assertTrue(entities.stream().anyMatch(e -> e.getId().equals(Entity1)),
-                "Список должен содержать первую созданную сущность");
-        assertTrue(entities.stream().anyMatch(e -> e.getId().equals(Entity2)),
-                "Список должен содержать вторую созданную сущность");
+        EntityHelper.verifyEntitiesCountIncreased(entities, initialCount, entity1, entity2);
     }
 }

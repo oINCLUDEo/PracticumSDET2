@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static org.testng.Assert.*;
+
 public class EntityHelper {
     private static final Faker faker = new Faker(new Locale("ru"));
     private static final ThreadLocal<List<String>> threadEntities =
@@ -18,7 +20,7 @@ public class EntityHelper {
      *
      * @return Объект Entity с заполненными случайными данными.
      */
-    @Step("Генерация Entity")
+    @Step("Генерация случайных данных для Entity")
     public static Entity generateRandomEntity() {
         Entity entity = new Entity();
         entity.setTitle(faker.funnyName().name());
@@ -38,7 +40,7 @@ public class EntityHelper {
         return entity;
     }
 
-    @Step("Отправка Entity на сервер")
+    @Step("Создание нового Entity на сервере")
     public static String createEntity() {
         Entity entity = generateRandomEntity();
 
@@ -51,7 +53,7 @@ public class EntityHelper {
         return entityId;
     }
 
-    @Step("Получение Entity")
+    @Step("Получение Entity с ID {entityId}")
     public static Entity getEntity(String entityId) {
         return BaseRequests.get("/get/" + entityId)
                 .then()
@@ -60,7 +62,7 @@ public class EntityHelper {
                 .as(Entity.class);
     }
 
-    @Step("Очистка Entity")
+    @Step("Очистка Entities после выполнения тестов")
     public static void cleanup() {
         List<String> entitiesToDelete = threadEntities.get();
         if (entitiesToDelete == null || entitiesToDelete.isEmpty()) {
@@ -74,7 +76,35 @@ public class EntityHelper {
         }
     }
 
-    @Step("Очистка данных потока")
+    @Step("Проверка созданной сущности с ID {expectedEntityId}")
+    public static void verifyEntityCreated(Entity createdEntity, String expectedEntityId) {
+        assertNotNull(createdEntity, "Entity не должен быть null");
+        assertNotNull(createdEntity.getId(), "ID Entity не должен быть null");
+        assertEquals(createdEntity.getId(), expectedEntityId, "ID созданного Entity должен соответствовать возвращенному при создании");
+        assertNotNull(createdEntity.getTitle(), "Название Entity не должно быть null");
+    }
+
+    @Step("Проверка обновленной сущности")
+    public static void verifyEntityUpdated(Entity updatedEntityFromServer, Entity updatedEntity, Entity originalEntity) {
+        assertEquals(updatedEntityFromServer.getTitle(), updatedEntity.getTitle(),
+                "Название Entity должно обновиться");
+        assertNotEquals(updatedEntityFromServer.getTitle(), originalEntity.getTitle(),
+                "Название Entity должно отличаться от исходного");
+        assertEquals(updatedEntityFromServer.getId(), originalEntity.getId(),
+                "ID Entity не должен изменяться при обновлении");
+    }
+
+    @Step("Проверка увеличения количества сущностей")
+    public static void verifyEntitiesCountIncreased(List<Entity> entities, int initialCount, String entity1Id, String entity2Id) {
+        assertTrue(entities.size() >= initialCount + 2,
+                "Общее количество сущностей должно увеличиться на 2");
+        assertTrue(entities.stream().anyMatch(e -> e.getId().equals(entity1Id)),
+                "Список должен содержать первую созданную сущность");
+        assertTrue(entities.stream().anyMatch(e -> e.getId().equals(entity2Id)),
+                "Список должен содержать вторую созданную сущность");
+    }
+
+    @Step("Освобождение ресурсов потока")
     public static void releaseResources() {
         threadEntities.remove();
     }
