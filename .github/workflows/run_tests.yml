@@ -48,12 +48,10 @@ jobs:
       - name: Set up Docker Compose
         run: |
           sudo apt-get install docker-compose
-
       - name: Build and run API with Docker Compose
         run: |
           cd api_repo
           docker-compose -f docker-compose.yaml up --build -d
-
       - name: Wait for API to be ready
         run: |
           until curl -s http://localhost:8080/api/_/docs/swagger; do
@@ -61,13 +59,11 @@ jobs:
             sleep 10
           done
           echo "API is ready!"
-
       - name: Run tests
         run: |
           cd test_repo
           mvn test
           mvn io.qameta.allure:allure-maven:report
-
       - name: Upload Allure report as an artifact
         uses: actions/upload-artifact@v4
         with:
