@@ -9,7 +9,8 @@ public class Entity {
     private String title;
     private boolean verified;
     private Addition addition;
-    private int[] important_numbers;
+    @JsonProperty("important_numbers")
+    private int[] importantNumbers;
 
     @Data
     public static class Addition {

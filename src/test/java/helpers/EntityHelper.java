@@ -11,6 +11,12 @@ import java.util.Locale;
 import static org.testng.Assert.*;
 
 public class EntityHelper {
+    private static final String CREATE_ENTITY = "/create";
+    private static final String GET_ENTITY = "/get/";
+    private static final String PATCH_ENTITY = "/patch/";
+    private static final String DELETE_ENTITY = "/delete/";
+    private static final String GET_ALL_ENTITIES = "/getAll";
+
     private static final Faker faker = new Faker(new Locale("ru"));
     private static final ThreadLocal<List<String>> threadEntities =
             ThreadLocal.withInitial(ArrayList::new);
@@ -36,7 +42,7 @@ public class EntityHelper {
         for (int i = 0; i < arraySize; i++) {
             important_numbers[i] = faker.number().numberBetween(1, 100);
         }
-        entity.setImportant_numbers(important_numbers);
+        entity.setImportantNumbers(important_numbers);
         return entity;
     }
 
@@ -44,7 +50,7 @@ public class EntityHelper {
     public static String createEntity() {
         Entity entity = generateRandomEntity();
 
-        String entityId = BaseRequests.post("/create", entity)
+        String entityId = BaseRequests.post(CREATE_ENTITY, entity)
                 .then()
                 .statusCode(200)
                 .extract()
@@ -55,12 +61,38 @@ public class EntityHelper {
 
     @Step("Получение Entity с ID {entityId}")
     public static Entity getEntity(String entityId) {
-        return BaseRequests.get("/get/" + entityId)
+        return BaseRequests.get(GET_ENTITY + entityId)
                 .then()
                 .statusCode(200)
                 .extract()
                 .as(Entity.class);
     }
+
+    @Step("Обновление Entity с ID {entityId}")
+    public static void updateEntity(String entityId, Entity updatedEntity) {
+        BaseRequests.patch(PATCH_ENTITY + entityId, updatedEntity)
+                .then()
+                .statusCode(204);
+    }
+
+    @Step("Удаление Entity с ID {entityId}")
+    public static void deleteEntity(String entityId) {
+        BaseRequests.delete(DELETE_ENTITY + entityId)
+                .then()
+                .statusCode(204);
+        threadEntities.get().remove(entityId);
+    }
+
+    @Step("Получение всех Entities")
+    public static List<Entity> getAllEntities() {
+        return BaseRequests.get(GET_ALL_ENTITIES)
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(dto.EntitiesWrapper.class)
+                .getEntity();
+    }
+
 
     @Step("Очистка Entities после выполнения тестов")
     public static void cleanup() {
@@ -70,7 +102,7 @@ public class EntityHelper {
         }
 
         for (String entityId : new ArrayList<>(entitiesToDelete)) {
-            BaseRequests.delete("/delete/" + entityId)
+            BaseRequests.delete(DELETE_ENTITY + entityId)
                     .then()
                     .statusCode(204);
         }
@@ -93,6 +125,14 @@ public class EntityHelper {
         assertEquals(updatedEntityFromServer.getId(), originalEntity.getId(),
                 "ID Entity не должен изменяться при обновлении");
     }
+
+    @Step("Проверка, что Entity с ID {entityId} успешно удалён")
+    public static void verifyEntityDeleted(String entityId) {
+        BaseRequests.get(GET_ENTITY + entityId)
+                .then()
+                .statusCode(500);
+    }
+
 
     @Step("Проверка увеличения количества сущностей")
     public static void verifyEntitiesCountIncreased(List<Entity> entities, int initialCount, String entity1Id, String entity2Id) {

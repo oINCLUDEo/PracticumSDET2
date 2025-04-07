@@ -1,9 +1,7 @@
 package tests;
 
-import dto.EntitiesWrapper;
 import dto.Entity;
 import helpers.EntityHelper;
-import helpers.BaseRequests;
 import io.qameta.allure.*;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterSuite;
@@ -31,13 +29,8 @@ public class APITests {
     @Test
     public void createEntityTest() {
         String entityId = EntityHelper.createEntity();
-
-        Entity createdEntity = BaseRequests.get("/get/" + entityId)
-                .then()
-                .statusCode(200)
-                .extract()
-                .as(Entity.class);
-        EntityHelper.verifyEntityCreated(createdEntity, entityId);  // Шаг для проверки созданной сущности
+        Entity createdEntity = EntityHelper.getEntity(entityId);
+        EntityHelper.verifyEntityCreated(createdEntity, entityId);
     }
 
     @Story("Изменение Entity")
@@ -45,22 +38,12 @@ public class APITests {
     @Test
     public void updateEntityTest() {
         String entityId = EntityHelper.createEntity();
-        Entity originalEntity = BaseRequests.get("/get/" + entityId)
-                .then()
-                .statusCode(200)
-                .extract()
-                .as(Entity.class);
+        Entity originalEntity = EntityHelper.getEntity(entityId);
 
         Entity updatedEntity = EntityHelper.generateRandomEntity();
-        BaseRequests.patch("/patch/" + entityId, updatedEntity)
-                .then()
-                .statusCode(204);
+        EntityHelper.updateEntity(entityId, updatedEntity);
 
-        Entity updatedEntityFromServer = BaseRequests.get("/get/" + entityId)
-                .then()
-                .statusCode(200)
-                .extract()
-                .as(Entity.class);
+        Entity updatedEntityFromServer = EntityHelper.getEntity(entityId);
         EntityHelper.verifyEntityUpdated(updatedEntityFromServer, updatedEntity, originalEntity);
     }
 
@@ -68,20 +51,9 @@ public class APITests {
     @Description("Тест удаления Entity по его ID")
     @Test
     public void deleteEntityTest() {
-        Entity entity = EntityHelper.generateRandomEntity();
-        String entityId = BaseRequests.post("/create", entity)
-                .then()
-                .statusCode(200)
-                .extract()
-                .asString();
-
-        BaseRequests.delete("/delete/" + entityId)
-                .then()
-                .statusCode(204);
-        BaseRequests.get("/get/" + entityId)
-                .then()
-                .statusCode(500);
-
+        String entityId = EntityHelper.createEntity();
+        EntityHelper.deleteEntity(entityId);
+        EntityHelper.verifyEntityDeleted(entityId);
     }
 
     @Story("Получение Entity по ID")
@@ -90,29 +62,19 @@ public class APITests {
         String entityId = EntityHelper.createEntity();
         Entity entity = EntityHelper.getEntity(entityId);
 
-        assertNotNull(entity.getId(), "ID сущности не должен быть null");
-        assertNotNull(entity.getTitle(), "Название сущности не должно быть null");
+        assertNotNull(entity.getId(), "ID Entity не должен быть null");
+        assertNotNull(entity.getTitle(), "Название Entity не должно быть null");
     }
 
     @Story("Получение всех Entities")
     @Test
     public void getAllEntitiesTest() {
-        int initialCount = BaseRequests.get("/getAll")
-                .then()
-                .statusCode(200)
-                .extract()
-                .as(EntitiesWrapper.class)
-                .getEntity()
-                .size();
+        int initialCount = EntityHelper.getAllEntities().size();
+
         String entity1 = EntityHelper.createEntity();
         String entity2 = EntityHelper.createEntity();
 
-        List<Entity> entities = BaseRequests.get("/getAll")
-                .then()
-                .statusCode(200)
-                .extract()
-                .as(EntitiesWrapper.class)
-                .getEntity();
+        List<Entity> entities = EntityHelper.getAllEntities();
         EntityHelper.verifyEntitiesCountIncreased(entities, initialCount, entity1, entity2);
     }
 }

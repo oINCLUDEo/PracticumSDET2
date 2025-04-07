@@ -14,7 +14,7 @@ import static io.restassured.RestAssured.given;
 
 public class BaseRequests {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseRequests.class);
-    private static final String BASE_URI = "http://localhost:8080/api";
+    private static final String BASE_URL = "http://localhost:8080/api";
 
     /**
      * Инициализирует спецификацию запросов с базовыми настройками.
@@ -24,7 +24,7 @@ public class BaseRequests {
     public static RequestSpecification initRequestSpecification() {
         return new RequestSpecBuilder()
                 .setContentType(ContentType.JSON)
-                .setBaseUri(BASE_URI)
+                .setBaseUri(BASE_URL)
                 .setAccept(ContentType.JSON)
                 .build();
     }
