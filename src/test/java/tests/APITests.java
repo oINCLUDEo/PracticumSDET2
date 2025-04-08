@@ -14,6 +14,7 @@ import static org.testng.Assert.*;
 @Epic("Тестирование API")
 @Feature("Взаимодействие с Entity")
 public class APITests {
+    private static final String nonExistentEntityId = "non-existent-id";
     @AfterMethod(alwaysRun = true)
     public void tearDown() {
         EntityHelper.cleanup();
@@ -26,7 +27,7 @@ public class APITests {
 
     @Story("Создание Entity")
     @Description("Тест создания нового Entity со сгенерированными данными")
-    @Test
+    @Test(groups = "positive")
     public void createEntityTest() {
         String entityId = EntityHelper.createEntity();
         Entity createdEntity = EntityHelper.getEntity(entityId);
@@ -35,7 +36,7 @@ public class APITests {
 
     @Story("Изменение Entity")
     @Description("Тест изменения существующего Entity")
-    @Test
+    @Test(groups = "positive")
     public void updateEntityTest() {
         String entityId = EntityHelper.createEntity();
         Entity originalEntity = EntityHelper.getEntity(entityId);
@@ -49,15 +50,16 @@ public class APITests {
 
     @Story("Удаление Entity")
     @Description("Тест удаления Entity по его ID")
-    @Test
+    @Test(groups = "positive")
     public void deleteEntityTest() {
         String entityId = EntityHelper.createEntity();
         EntityHelper.deleteEntity(entityId);
         EntityHelper.verifyEntityDeleted(entityId);
     }
 
-    @Story("Получение Entity по ID")
-    @Test
+    @Story("Получение Entity")
+    @Description("Тест получения Entity по его ID")
+    @Test(groups = "positive")
     public void getEntityTest() {
         String entityId = EntityHelper.createEntity();
         Entity entity = EntityHelper.getEntity(entityId);
@@ -67,7 +69,8 @@ public class APITests {
     }
 
     @Story("Получение всех Entities")
-    @Test
+    @Description("Тест получения всех Entities")
+    @Test(groups = "positive")
     public void getAllEntitiesTest() {
         int initialCount = EntityHelper.getAllEntities().size();
 
@@ -76,5 +79,35 @@ public class APITests {
 
         List<Entity> entities = EntityHelper.getAllEntities();
         EntityHelper.verifyEntitiesCountIncreased(entities, initialCount, entity1, entity2);
+    }
+
+    @Story("Удаление несуществующего Entity")
+    @Description("Тест удаления Entity, которого не существует")
+    @Test(groups = "negative")
+    public void deleteNonExistentEntityTest() {
+        EntityHelper.verifyEntityDeleteFails(nonExistentEntityId);
+    }
+
+    @Story("Получение несуществующего Entity")
+    @Description("Тест получения Entity, которого не существует")
+    @Test(groups = "negative")
+    public void getNonExistentEntityTest() {
+        EntityHelper.verifyEntityNotFound(nonExistentEntityId);
+    }
+
+    @Story("Обновление несуществующего Entity")
+    @Description("Тест обновления Entity, которого не существует")
+    @Test(groups = "negative")
+    public void updateNonExistentEntityTest() {
+        Entity updatedEntity = EntityHelper.generateRandomEntity();
+        EntityHelper.verifyEntityUpdateFails(nonExistentEntityId, updatedEntity);
+    }
+
+    @Story("Создание Entity с некорректными данными")
+    @Description("Тест создания Entity с недостающими или неверными данными")
+    @Test(groups = "negative")
+    public void createEntityWithInvalidDataTest() {
+        Entity invalidEntity = new Entity();
+        EntityHelper.verifyEntityCreationFails(invalidEntity);
     }
 }

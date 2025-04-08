@@ -108,7 +108,7 @@ public class EntityHelper {
         }
     }
 
-    @Step("Проверка созданной сущности с ID {expectedEntityId}")
+    @Step("Проверка созданного Entity с ID {expectedEntityId}")
     public static void verifyEntityCreated(Entity createdEntity, String expectedEntityId) {
         assertNotNull(createdEntity, "Entity не должен быть null");
         assertNotNull(createdEntity.getId(), "ID Entity не должен быть null");
@@ -116,7 +116,7 @@ public class EntityHelper {
         assertNotNull(createdEntity.getTitle(), "Название Entity не должно быть null");
     }
 
-    @Step("Проверка обновленной сущности")
+    @Step("Проверка обновленного Entity")
     public static void verifyEntityUpdated(Entity updatedEntityFromServer, Entity updatedEntity, Entity originalEntity) {
         assertEquals(updatedEntityFromServer.getTitle(), updatedEntity.getTitle(),
                 "Название Entity должно обновиться");
@@ -133,8 +133,7 @@ public class EntityHelper {
                 .statusCode(500);
     }
 
-
-    @Step("Проверка увеличения количества сущностей")
+    @Step("Проверка увеличения количества Entities")
     public static void verifyEntitiesCountIncreased(List<Entity> entities, int initialCount, String entity1Id, String entity2Id) {
         assertTrue(entities.size() >= initialCount + 2,
                 "Общее количество сущностей должно увеличиться на 2");
@@ -143,6 +142,35 @@ public class EntityHelper {
         assertTrue(entities.stream().anyMatch(e -> e.getId().equals(entity2Id)),
                 "Список должен содержать вторую созданную сущность");
     }
+
+    @Step("Проверка на ошибку 500 при удалении несуществующего Entity с ID {entityId}")
+    public static void verifyEntityDeleteFails(String entityId) {
+        BaseRequests.delete(DELETE_ENTITY + entityId)
+                .then()
+                .statusCode(500);
+    }
+
+    @Step("Проверка на ошибку 500 для несуществующего Entity с ID {entityId}")
+    public static void verifyEntityNotFound(String entityId) {
+        BaseRequests.get(GET_ENTITY + entityId)
+                .then()
+                .statusCode(500);
+    }
+
+    @Step("Проверка на ошибку 400 при обновлении несуществующего Entity с ID {entityId}")
+    public static void verifyEntityUpdateFails(String entityId, Entity updatedEntity) {
+        BaseRequests.patch(PATCH_ENTITY + entityId, updatedEntity)
+                .then()
+                .statusCode(400);
+    }
+
+    @Step("Проверка на ошибку при создании Entity с некорректными данными")
+    public static void verifyEntityCreationFails(Entity entity) {
+        BaseRequests.post(CREATE_ENTITY, entity)
+                .then()
+                .statusCode(500);
+    }
+
 
     @Step("Освобождение ресурсов потока")
     public static void releaseResources() {

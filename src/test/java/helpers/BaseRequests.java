@@ -14,7 +14,7 @@ import static io.restassured.RestAssured.given;
 
 public class BaseRequests {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseRequests.class);
-    private static final String BASE_URL = "http://localhost:8080/api";
+    private static final String BASE_URI = "http://localhost:8080/api";
 
     /**
      * Инициализирует спецификацию запросов с базовыми настройками.
@@ -24,7 +24,7 @@ public class BaseRequests {
     public static RequestSpecification initRequestSpecification() {
         return new RequestSpecBuilder()
                 .setContentType(ContentType.JSON)
-                .setBaseUri(BASE_URL)
+                .setBaseUri(BASE_URI)
                 .setAccept(ContentType.JSON)
                 .build();
     }
@@ -42,7 +42,7 @@ public class BaseRequests {
                 .spec(initRequestSpecification())
                 .get(endpoint);
 
-        attachResponse(response);  // Добавление тела ответа в Allure
+        attachResponse(response);
         return response;
     }
 
@@ -61,7 +61,7 @@ public class BaseRequests {
                 .body(body)
                 .post(endpoint);
 
-        attachResponse(response);  // Добавление тела ответа в Allure
+        attachResponse(response);
         return response;
     }
 
