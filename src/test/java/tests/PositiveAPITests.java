@@ -3,8 +3,6 @@ package tests;
 import dto.Entity;
 import helpers.EntityHelper;
 import io.qameta.allure.*;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterSuite;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -13,18 +11,8 @@ import java.util.Map;
 import static org.testng.Assert.*;
 
 @Epic("Тестирование API")
-@Feature("Взаимодействие с Entity")
-public class APITests {
-    private static final String nonExistentEntityId = "non-existent-id";
-    @AfterMethod(alwaysRun = true)
-    public void tearDown() {
-        EntityHelper.cleanup();
-    }
-
-    @AfterSuite
-    public void suiteCleanup() {
-        EntityHelper.releaseResources();
-    }
+@Feature("Позитивные тесты")
+public class PositiveAPITests extends BaseAPITests {
 
     @Story("Создание Entity")
     @Description("Тест создания нового Entity со сгенерированными данными")
@@ -88,7 +76,7 @@ public class APITests {
     public void getAllEntitiesWithRandomParamsTest() {
         List<Entity> allEntities = EntityHelper.getAllEntities();
         if (allEntities.isEmpty()) {
-            fail("На сервере нет Entites для фильтрации");
+            fail("На сервере нет Entities для фильтрации");
             return;
         }
         Map<String, String> params = EntityHelper.generateRandomFilterParams(allEntities);
@@ -96,44 +84,12 @@ public class APITests {
 
         boolean randomVerified = Boolean.parseBoolean(params.get("verified"));
         assertTrue(filteredEntities.stream().allMatch(entity -> entity.isVerified() == randomVerified),
-                "Enteties должны быть с verified = " + randomVerified);
+                "Entities должны быть с verified = " + randomVerified);
         String randomTitle = params.get("title");
         assertTrue(filteredEntities.stream().allMatch(entity -> entity.getTitle().contains(randomTitle)),
-                "Entites должны иметь title, соответствующий фильтру: " + randomTitle);
+                "Entities должны иметь title, соответствующий фильтру: " + randomTitle);
         int randomPerPage = Integer.parseInt(params.get("perPage"));
         assertTrue(filteredEntities.size() <= randomPerPage,
                 "Количество Entities на странице не должно превышать " + randomPerPage);
-    }
-
-
-
-    @Story("Удаление несуществующего Entity")
-    @Description("Тест удаления Entity, которого не существует")
-    @Test(groups = "negative")
-    public void deleteNonExistentEntityTest() {
-        EntityHelper.verifyEntityDeleteFails(nonExistentEntityId);
-    }
-
-    @Story("Получение несуществующего Entity")
-    @Description("Тест получения Entity, которого не существует")
-    @Test(groups = "negative")
-    public void getNonExistentEntityTest() {
-        EntityHelper.verifyEntityNotFound(nonExistentEntityId);
-    }
-
-    @Story("Обновление несуществующего Entity")
-    @Description("Тест обновления Entity, которого не существует")
-    @Test(groups = "negative")
-    public void updateNonExistentEntityTest() {
-        Entity updatedEntity = EntityHelper.generateRandomEntity();
-        EntityHelper.verifyEntityUpdateFails(nonExistentEntityId, updatedEntity);
-    }
-
-    @Story("Создание Entity с некорректными данными")
-    @Description("Тест создания Entity с недостающими или неверными данными")
-    @Test(groups = "negative")
-    public void createEntityWithInvalidDataTest() {
-        Entity invalidEntity = new Entity();
-        EntityHelper.verifyEntityCreationFails(invalidEntity);
     }
 }

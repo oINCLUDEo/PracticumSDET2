@@ -2,7 +2,7 @@
 <suite name="API Test Suite">
     <test name="Positive Tests" parallel="methods" thread-count="6">
         <classes>
-            <class name="tests.APITests">
+            <class name="tests.PositiveAPITests">
                 <methods>
                     <include name="createEntityTest"/>
                     <include name="updateEntityTest"/>
@@ -14,9 +14,10 @@
             </class>
         </classes>
     </test>
+
     <test name="Negative Tests" parallel="methods" thread-count="4">
         <classes>
-            <class name="tests.APITests">
+            <class name="tests.NegativeAPITests">
                 <methods>
                     <include name="deleteNonExistentEntityTest"/>
                     <include name="getNonExistentEntityTest"/>
