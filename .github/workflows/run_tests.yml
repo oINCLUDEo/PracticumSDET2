@@ -54,9 +54,16 @@ jobs:
           docker-compose -f docker-compose.yaml up --build -d
       - name: Wait for API to be ready
         run: |
+          MAX_ATTEMPTS=30  # Максимальное количество попыток
+          ATTEMPT=0
           until curl -s http://localhost:8080/api/_/docs/swagger; do
-            echo "Waiting for API to be ready..."
-            sleep 10
+            ATTEMPT=$((ATTEMPT+1))
+            if [ $ATTEMPT -ge $MAX_ATTEMPTS ]; then
+                echo "API not ready after $MAX_ATTEMPTS attempts."
+                exit 1
+                fi
+                echo "Waiting for API to be ready... (Attempt $ATTEMPT of $MAX_ATTEMPTS)"
+                sleep 20
           done
           echo "API is ready!"
       - name: Run tests
