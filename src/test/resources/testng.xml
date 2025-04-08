@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.1.dtd">
 <suite name="API Test Suite">
-    <test name="Positive Tests" parallel="methods" thread-count="5">
+    <test name="Positive Tests" parallel="methods" thread-count="6">
         <classes>
             <class name="tests.APITests">
                 <methods>
@@ -9,6 +9,7 @@
                     <include name="deleteEntityTest"/>
                     <include name="getEntityTest"/>
                     <include name="getAllEntitiesTest"/>
+                    <include name="getAllEntitiesWithRandomParamsTest"/>
                 </methods>
             </class>
         </classes>

@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+import java.util.Map;
+
 import static io.restassured.RestAssured.given;
 
 public class BaseRequests {
@@ -40,6 +42,25 @@ public class BaseRequests {
         LOGGER.info("Отправка GET-запроса на эндпоинт: {}", endpoint);
         Response response = given()
                 .spec(initRequestSpecification())
+                .get(endpoint);
+
+        attachResponse(response);
+        return response;
+    }
+
+    /**
+     * Выполняет GET-запрос с параметрами к указанному эндпоинту.
+     *
+     * @param endpoint Эндпоинт для выполнения запроса.
+     * @param params Параметры для фильтрации.
+     * @return Ответ от сервера.
+     */
+    @Step("Выполнение GET-запроса по эндпоинту {endpoint} с параметрами {params}")
+    public static Response getWithParams(String endpoint, Map<String, String> params) {
+        LOGGER.info("Отправка GET-запроса на эндпоинт: {} с параметрами: {}", endpoint, params);
+        Response response = given()
+                .spec(initRequestSpecification())
+                .params(params)
                 .get(endpoint);
 
         attachResponse(response);

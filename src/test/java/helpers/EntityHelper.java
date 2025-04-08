@@ -7,6 +7,7 @@ import io.qameta.allure.Step;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static org.testng.Assert.*;
 
@@ -46,6 +47,31 @@ public class EntityHelper {
         return entity;
     }
 
+    /**
+     * Генерирует случайные параметры для фильтрации сущностей.
+     * @param allEntities Список всех сущностей для фильтрации.
+     * @return Случайно сгенерированные параметры.
+     */
+    public static Map<String, String> generateRandomFilterParams(List<Entity> allEntities) {
+        if (allEntities.isEmpty()) {
+            throw new IllegalStateException("Список сущностей не должен быть пустым");
+        }
+
+        Faker faker = new Faker();
+        String randomTitle = allEntities.get(faker.number().numberBetween(0, allEntities.size())).getTitle();
+        boolean randomVerified = faker.bool().bool();
+        int totalPages = (int) Math.ceil(allEntities.size() / 10.0);
+        int randomPage = faker.number().numberBetween(1, totalPages > 0 ? totalPages : 1);
+        int randomPerPage = faker.number().numberBetween(2, 10);
+
+        return Map.of(
+                "title", randomTitle,
+                "verified", String.valueOf(randomVerified),
+                "page", String.valueOf(randomPage),
+                "perPage", String.valueOf(randomPerPage)
+        );
+    }
+
     @Step("Создание нового Entity на сервере")
     public static String createEntity() {
         Entity entity = generateRandomEntity();
@@ -83,7 +109,7 @@ public class EntityHelper {
         threadEntities.get().remove(entityId);
     }
 
-    @Step("Получение всех Entities")
+    @Step("Получение всех Entities без параметров")
     public static List<Entity> getAllEntities() {
         return BaseRequests.get(GET_ALL_ENTITIES)
                 .then()
@@ -93,6 +119,15 @@ public class EntityHelper {
                 .getEntity();
     }
 
+    @Step("Получение всех Entities с параметрами {params}")
+    public static List<Entity> getAllEntitiesWithParams(Map<String, String> params) {
+        return BaseRequests.getWithParams(GET_ALL_ENTITIES, params)
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(dto.EntitiesWrapper.class)
+                .getEntity();
+    }
 
     @Step("Очистка Entities после выполнения тестов")
     public static void cleanup() {

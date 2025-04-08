@@ -8,6 +8,7 @@ import org.testng.annotations.AfterSuite;
 import org.testng.annotations.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.testng.Assert.*;
 
@@ -80,6 +81,31 @@ public class APITests {
         List<Entity> entities = EntityHelper.getAllEntities();
         EntityHelper.verifyEntitiesCountIncreased(entities, initialCount, entity1, entity2);
     }
+
+    @Story("Получение всех Entities со случайными параметрами фильтрации")
+    @Description("Тест получения всех Entities со случайно сгенерированными параметрами фильтрации")
+    @Test(groups = "positive")
+    public void getAllEntitiesWithRandomParamsTest() {
+        List<Entity> allEntities = EntityHelper.getAllEntities();
+        if (allEntities.isEmpty()) {
+            fail("На сервере нет Entites для фильтрации");
+            return;
+        }
+        Map<String, String> params = EntityHelper.generateRandomFilterParams(allEntities);
+        List<Entity> filteredEntities = EntityHelper.getAllEntitiesWithParams(params);
+
+        boolean randomVerified = Boolean.parseBoolean(params.get("verified"));
+        assertTrue(filteredEntities.stream().allMatch(entity -> entity.isVerified() == randomVerified),
+                "Enteties должны быть с verified = " + randomVerified);
+        String randomTitle = params.get("title");
+        assertTrue(filteredEntities.stream().allMatch(entity -> entity.getTitle().contains(randomTitle)),
+                "Entites должны иметь title, соответствующий фильтру: " + randomTitle);
+        int randomPerPage = Integer.parseInt(params.get("perPage"));
+        assertTrue(filteredEntities.size() <= randomPerPage,
+                "Количество Entities на странице не должно превышать " + randomPerPage);
+    }
+
+
 
     @Story("Удаление несуществующего Entity")
     @Description("Тест удаления Entity, которого не существует")
